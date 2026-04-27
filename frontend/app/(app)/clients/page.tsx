@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "../../../utils/supabase/server";
 import { cookies } from "next/headers";
-import { Plus, Users, Mail, Phone, MapPin, MoreVertical } from "lucide-react";
+import { Plus, Users, Mail, Phone, MapPin } from "lucide-react";
 import ClientForm from "../../../components/ClientForm";
+import ClientCardMenu from "../../../components/ClientCardMenu";
 import Link from "next/link";
 
 export default async function ClientsPage() {
@@ -65,9 +66,7 @@ export default async function ClientsPage() {
                 <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary font-bold text-lg">
                   {client.name[0]}
                 </div>
-                <button className="p-2 hover:bg-muted rounded-xl transition-colors">
-                  <MoreVertical className="w-5 h-5 text-muted-foreground" />
-                </button>
+                <ClientCardMenu client={client} />
               </div>
 
               <div className="mb-6">
