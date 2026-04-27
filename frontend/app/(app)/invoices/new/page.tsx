@@ -9,7 +9,8 @@ import {
   Trash2, 
   Loader2, 
   Save,
-  ChevronDown
+  ChevronDown,
+  Percent
 } from "lucide-react";
 import Link from "next/link";
 
@@ -19,6 +20,7 @@ export default function NewInvoicePage() {
   const [formData, setFormData] = useState({
     client_id: "",
     due_date: "",
+    tax_percent: 0,
     notes: "",
     line_items: [{ description: "", quantity: 1, price: 0 }]
   });
@@ -60,8 +62,16 @@ export default function NewInvoicePage() {
     setFormData({ ...formData, line_items: newList });
   };
 
-  const calculateTotal = () => {
+  const calculateSubtotal = () => {
     return formData.line_items.reduce((acc, item) => acc + (item.quantity * item.price), 0);
+  };
+
+  const calculateTax = () => {
+    return (calculateSubtotal() * formData.tax_percent) / 100;
+  };
+
+  const calculateTotal = () => {
+    return calculateSubtotal() + calculateTax();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,6 +81,8 @@ export default function NewInvoicePage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    const subtotal = calculateSubtotal();
+    const taxAmount = calculateTax();
     const totalAmount = calculateTotal();
     const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -82,6 +94,9 @@ export default function NewInvoicePage() {
           client_id: formData.client_id,
           invoice_number: invoiceNumber,
           amount: totalAmount,
+          subtotal: subtotal,
+          tax_percent: formData.tax_percent,
+          tax_amount: taxAmount,
           due_date: formData.due_date,
           notes: formData.notes,
           line_items: formData.line_items,
@@ -137,7 +152,7 @@ export default function NewInvoicePage() {
             </div>
           </div>
 
-          {/* Invoice Dates */}
+          {/* Invoice Dates & Tax */}
           <div className="p-8 bg-card border border-border rounded-[2rem] shadow-sm space-y-4">
             <h3 className="text-lg font-bold mb-4">Invoice Terms</h3>
             <div className="space-y-2">
@@ -147,6 +162,34 @@ export default function NewInvoicePage() {
                 required
                 value={formData.due_date}
                 onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                className="w-full bg-muted/50 border border-border rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-wider text-muted-foreground ml-1">Tax / GST %</label>
+              <div className="relative">
+                <select
+                  value={formData.tax_percent}
+                  onChange={(e) => setFormData({ ...formData, tax_percent: Number(e.target.value) })}
+                  className="w-full bg-muted/50 border border-border rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-primary appearance-none transition-all font-bold"
+                >
+                  <option value={0}>No Tax (0%)</option>
+                  <option value={5}>GST @ 5%</option>
+                  <option value={12}>GST @ 12%</option>
+                  <option value={18}>GST @ 18%</option>
+                  <option value={28}>GST @ 28%</option>
+                </select>
+                <Percent className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+              </div>
+              <p className="text-[10px] text-muted-foreground ml-1">Or enter a custom rate:</p>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={formData.tax_percent}
+                onChange={(e) => setFormData({ ...formData, tax_percent: Number(e.target.value) })}
+                placeholder="Custom %"
                 className="w-full bg-muted/50 border border-border rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
               />
             </div>
@@ -217,9 +260,23 @@ export default function NewInvoicePage() {
             ))}
           </div>
 
-          <div className="mt-10 pt-8 border-t border-border flex flex-col items-end">
-            <p className="text-muted-foreground text-sm font-medium">Grand Total</p>
-            <h2 className="text-4xl font-black text-foreground">₹{calculateTotal().toLocaleString()}</h2>
+          <div className="mt-10 pt-8 border-t border-border">
+            <div className="flex flex-col items-end space-y-3">
+              <div className="w-full max-w-xs flex justify-between text-sm">
+                <span className="text-muted-foreground font-medium">Subtotal</span>
+                <span className="font-bold">₹{calculateSubtotal().toLocaleString()}</span>
+              </div>
+              {formData.tax_percent > 0 && (
+                <div className="w-full max-w-xs flex justify-between text-sm">
+                  <span className="text-muted-foreground font-medium">Tax / GST ({formData.tax_percent}%)</span>
+                  <span className="font-bold text-amber-500">+ ₹{calculateTax().toLocaleString()}</span>
+                </div>
+              )}
+              <div className="w-full max-w-xs pt-3 border-t border-border flex justify-between">
+                <span className="text-muted-foreground text-sm font-medium">Grand Total</span>
+                <h2 className="text-3xl font-black text-foreground">₹{calculateTotal().toLocaleString()}</h2>
+              </div>
+            </div>
           </div>
         </div>
 

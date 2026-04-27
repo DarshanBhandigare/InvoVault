@@ -160,12 +160,20 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <div className="w-full max-w-xs space-y-4">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600 font-medium">Subtotal</span>
-                <span className="font-bold text-slate-900">₹{Number(invoice.amount).toLocaleString()}</span>
+                <span className="font-bold text-slate-900">₹{Number(invoice.subtotal || invoice.amount).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-600 font-medium">Tax (0%)</span>
-                <span className="font-bold text-slate-900">₹0</span>
-              </div>
+              {(invoice.tax_percent > 0) && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-600 font-medium">Tax / GST ({invoice.tax_percent}%)</span>
+                  <span className="font-bold text-amber-600">+ ₹{Number(invoice.tax_amount || 0).toLocaleString()}</span>
+                </div>
+              )}
+              {(!invoice.tax_percent || invoice.tax_percent === 0) && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-600 font-medium">Tax (0%)</span>
+                  <span className="font-bold text-slate-900">₹0</span>
+                </div>
+              )}
               <div className="pt-4 border-t-2 border-indigo-600 flex justify-between">
                 <span className="text-lg font-black text-slate-900 uppercase tracking-widest">Total</span>
                 <span className="text-2xl font-black text-indigo-600">₹{Number(invoice.amount).toLocaleString()}</span>
