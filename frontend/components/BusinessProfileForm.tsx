@@ -32,7 +32,6 @@ export default function BusinessProfileForm({ initialData, userId }: { initialDa
       .upsert({
         ...formData,
         user_id: userId,
-        updated_at: new Date()
       }, { onConflict: 'user_id' });
 
     if (error) {

@@ -7,13 +7,15 @@ import {
   Trash2, 
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  RotateCcw,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface InvoiceTableProps {
   invoices: any[];
@@ -23,8 +25,20 @@ export default function InvoiceTable({ invoices }: InvoiceTableProps) {
   const supabase = createClient();
   const router = useRouter();
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [lastAction, setLastAction] = useState<{ id: string, prevStatus: string } | null>(null);
 
-  const handleStatusUpdate = async (id: string, newStatus: string) => {
+  // Clear last action after 10 seconds
+  useEffect(() => {
+    if (lastAction) {
+      const timer = setTimeout(() => setLastAction(null), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [lastAction]);
+
+  const handleStatusUpdate = async (id: string, newStatus: string, isUndo = false) => {
+    const currentInvoice = invoices.find(inv => inv.id === id);
+    const prevStatus = currentInvoice?.status || 'pending';
+
     setProcessingId(id);
     const { error } = await supabase
       .from('invoices')
@@ -34,6 +48,11 @@ export default function InvoiceTable({ invoices }: InvoiceTableProps) {
     if (error) {
       alert(error.message);
     } else {
+      if (!isUndo) {
+        setLastAction({ id, prevStatus });
+      } else {
+        setLastAction(null);
+      }
       router.refresh();
     }
     setProcessingId(null);
@@ -121,23 +140,34 @@ export default function InvoiceTable({ invoices }: InvoiceTableProps) {
                 </td>
                 <td className="px-8 py-6 text-right">
                   <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {inv.status !== 'paid' && inv.status !== 'rejected' && (
+                    {lastAction?.id === inv.id ? (
                       <button 
-                        onClick={() => handleStatusUpdate(inv.id, 'paid')}
-                        title="Mark as Paid"
-                        className="p-2.5 hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-500 rounded-xl transition-all"
+                        onClick={() => lastAction && handleStatusUpdate(inv.id, lastAction.prevStatus, true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-bold text-[10px] hover:bg-slate-200 transition-all border border-slate-200"
                       >
-                        <CheckCircle className="w-4 h-4" />
+                        <RotateCcw className="w-3 h-3" /> Undo
                       </button>
-                    )}
-                    {inv.status !== 'rejected' && (
-                      <button 
-                        onClick={() => handleStatusUpdate(inv.id, 'rejected')}
-                        title="Reject Invoice"
-                        className="p-2.5 hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 rounded-xl transition-all"
-                      >
-                        <XCircle className="w-4 h-4" />
-                      </button>
+                    ) : (
+                      <>
+                        {inv.status !== 'paid' && inv.status !== 'rejected' && (
+                          <button 
+                            onClick={() => handleStatusUpdate(inv.id, 'paid')}
+                            title="Mark as Paid"
+                            className="p-2.5 hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-500 rounded-xl transition-all"
+                          >
+                            {processingId === inv.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                          </button>
+                        )}
+                        {inv.status !== 'rejected' && (
+                          <button 
+                            onClick={() => handleStatusUpdate(inv.id, 'rejected')}
+                            title="Reject Invoice"
+                            className="p-2.5 hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 rounded-xl transition-all"
+                          >
+                            {processingId === inv.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </>
                     )}
                     <Link 
                       href={`/invoices/${inv.id}`}
