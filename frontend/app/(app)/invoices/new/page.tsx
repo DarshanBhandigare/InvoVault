@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../../utils/supabase/client";
 import { 
@@ -17,8 +17,14 @@ import Link from "next/link";
 export default function NewInvoicePage() {
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<any[]>([]);
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }, []);
+
   const [formData, setFormData] = useState({
     client_id: "",
+    issued_date: todayStr,
     due_date: "",
     tax_percent: 0,
     notes: "",
@@ -97,6 +103,7 @@ export default function NewInvoicePage() {
           subtotal: subtotal,
           tax_percent: formData.tax_percent,
           tax_amount: taxAmount,
+          issued_date: formData.issued_date,
           due_date: formData.due_date,
           notes: formData.notes,
           line_items: formData.line_items,
@@ -155,15 +162,27 @@ export default function NewInvoicePage() {
           {/* Invoice Dates & Tax */}
           <div className="p-8 bg-card border border-border rounded-[2rem] shadow-sm space-y-4">
             <h3 className="text-lg font-bold mb-4">Invoice Terms</h3>
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-wider text-muted-foreground ml-1">Due Date *</label>
-              <input
-                type="date"
-                required
-                value={formData.due_date}
-                onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                className="w-full bg-muted/50 border border-border rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-wider text-muted-foreground ml-1">Issued Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={formData.issued_date}
+                  onChange={(e) => setFormData({ ...formData, issued_date: e.target.value })}
+                  className="w-full bg-muted/50 border border-border rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-wider text-muted-foreground ml-1">Due Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={formData.due_date}
+                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                  className="w-full bg-muted/50 border border-border rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-wider text-muted-foreground ml-1">Tax / GST %</label>
