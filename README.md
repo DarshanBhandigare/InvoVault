@@ -3,7 +3,7 @@
 
 InvoVault is a premium, AI-powered invoice management platform designed to help micro-SMEs and freelancers track their finances, get paid faster, and gain intelligent insights into their business health.
 
-![InvoVault Dashboard](https://raw.githubusercontent.com/your-username/invoicezap/main/public/screenshot-dashboard.png)
+![InvoVault Dashboard](https://i.ibb.co/dwW5LPLS/invovault-dashboard.png)
 
 ## 🌟 Key Features
 
