@@ -5,6 +5,7 @@ InvoVault is a premium, AI-powered invoice management platform designed to help 
 
 ---
 - **Dashboard Preview**
+
 ![InvoVault Dashboard](https://i.ibb.co/C31HMbMq/Capture.jpg)
 
 ## ✨ Features
