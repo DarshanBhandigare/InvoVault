@@ -1,8 +1,8 @@
 # 🛡️ InvoVault
 ### *Secure AI Invoice Manager*
 
-InvoVault is a premium, AI-powered invoice management platform designed to help micro-SMEs and freelancers track their finances, get paid faster, and gain intelligent insights into their business health.
-
+InvoVault is a invoice management platform designed to help micro-SMEs and freelancers track their finances.
+ 
 ---
 - **Dashboard Preview**
 
