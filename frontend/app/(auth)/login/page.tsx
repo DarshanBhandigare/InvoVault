@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Zap, Loader2 } from "lucide-react";
+import { ShieldCheck, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -37,8 +37,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl shadow-xl shadow-primary/20 mb-4">
-            <Zap className="text-white w-8 h-8 fill-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-600/20 mb-4">
+            <ShieldCheck className="text-white w-8 h-8" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
           <p className="text-muted-foreground mt-2">Log in to manage your invoices</p>
@@ -79,7 +79,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-white rounded-xl py-3.5 font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full bg-indigo-600 text-white rounded-xl py-3.5 font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In"}
             </button>
@@ -88,7 +88,7 @@ export default function LoginPage() {
           <div className="mt-8 text-center">
             <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
-              <Link href="/signup" className="text-primary font-bold hover:underline">
+              <Link href="/signup" className="text-indigo-600 font-bold hover:underline">
                 Create one for free
               </Link>
             </p>
