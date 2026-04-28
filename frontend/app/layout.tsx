@@ -6,8 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "InvoiceZap | Smart AI Invoice Manager",
-  description: "AI-powered invoice management for micro-SMEs in India.",
+  title: "InvoVault | Secure AI Invoice Manager",
+  description: "Secure, AI-powered invoice management for modern businesses.",
 };
 
 export default function RootLayout({

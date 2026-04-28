@@ -109,7 +109,7 @@ export default function Pricing() {
         <div className="relative z-10 space-y-4">
           <h3 className="text-2xl font-bold">Trusted by 5000+ Indian Small Businesses</h3>
           <p className="text-slate-400 max-w-xl mx-auto">
-            From freelancers to retailers, InvoiceZap is the first AI-native choice for professional invoicing in India.
+            From freelancers to retailers, InvoVault is the first AI-native choice for professional invoicing in India.
           </p>
           <div className="flex justify-center gap-8 grayscale opacity-50">
              {/* Mock Logos */}

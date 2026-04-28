@@ -8,7 +8,7 @@ import {
   FileText, 
   Users, 
   Settings, 
-  Zap,
+  ShieldCheck,
   PlusCircle,
   LogOut,
   User,
@@ -65,11 +65,11 @@ export default function Navbar() {
         )}>
           {/* Logo Section */}
           <Link href="/dashboard" className="flex items-center gap-2 pl-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Zap className="text-white w-5 h-5 fill-white" />
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <ShieldCheck className="text-white w-5 h-5" />
             </div>
             <span className="text-lg font-bold tracking-tight dark:text-white text-slate-900">
-              Invoice<span className="text-blue-500">Zap</span>
+              Invo<span className="text-indigo-600">Vault</span>
             </span>
           </Link>
 

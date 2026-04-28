@@ -1,9 +1,9 @@
-# ⚡ InvoiceZap
-### *Smart AI Invoice Manager for Modern Businesses*
+# 🛡️ InvoVault
+### *Secure AI Invoice Manager for Modern Businesses*
 
-InvoiceZap is a premium, AI-powered invoice management platform designed to help micro-SMEs and freelancers track their finances, get paid faster, and gain intelligent insights into their business health.
+InvoVault is a premium, AI-powered invoice management platform designed to help micro-SMEs and freelancers track their finances, get paid faster, and gain intelligent insights into their business health.
 
-![InvoiceZap Dashboard](https://raw.githubusercontent.com/your-username/invoicezap/main/public/screenshot-dashboard.png)
+![InvoVault Dashboard](https://raw.githubusercontent.com/your-username/invoicezap/main/public/screenshot-dashboard.png)
 
 ## 🌟 Key Features
 
@@ -58,7 +58,7 @@ InvoiceZap is a premium, AI-powered invoice management platform designed to help
    Visit [http://localhost:3000](http://localhost:3000)
 
 ## 🛡 Security
-InvoiceZap implements **Row Level Security (RLS)** in Supabase, ensuring that users can only view and manage their own invoices, clients, and business profiles. All data is scoped to the `auth.uid()`.
+InvoVault implements **Row Level Security (RLS)** in Supabase, ensuring that users can only view and manage their own invoices, clients, and business profiles. All data is scoped to the `auth.uid()`.
 
 ---
-Built with ❤️ by the InvoiceZap Team.
+Built with ❤️ by the InvoVault Team.
