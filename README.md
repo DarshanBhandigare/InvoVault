@@ -20,45 +20,8 @@ InvoVault is a premium, AI-powered invoice management platform designed to help 
 - **Styling**: Tailwind CSS v4, Framer Motion (Animations), Lucide Icons
 - **Backend**: Supabase (PostgreSQL, Auth, RLS)
 - **State Management**: React Context (Custom Theme System)
-- **Charts**: Recharts
-- **Date Management**: Date-fns
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18+
-- A Supabase Project
-
-### Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/invoicezap.git
-   cd invoicezap/frontend
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Environment Setup**:
-   Create a `.env.local` file in the `frontend` directory:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-   ```
-
-4. **Run the development server**:
-   ```bash
-   npm run dev
-   ```
-
-5. **Open the app**:
-   Visit [http://localhost:3000](http://localhost:3000)
 
 ## 🛡 Security
 InvoVault implements **Row Level Security (RLS)** in Supabase, ensuring that users can only view and manage their own invoices, clients, and business profiles. All data is scoped to the `auth.uid()`.
 
----
-Built with ❤️ by the InvoVault Team.
+
