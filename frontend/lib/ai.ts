@@ -15,10 +15,7 @@ function cleanResponse(text: string): string {
     if (l.startsWith("let me")) return false;
     if (l.startsWith("i need to")) return false;
     if (l.startsWith("data:")) return false;
-    if (l.startsWith("insight:")) {
-      // Keep the insight content after "Insight:"
-      return true;
-    }
+    if (l.startsWith("insight:")) return true;
     if (l.startsWith("provide actionable")) return false;
     if (l.startsWith("analysis:")) return false;
     return true;
@@ -51,12 +48,16 @@ async function callOpenRouter(prompt: string): Promise<string> {
       model: "nvidia/nemotron-3-super-120b-a12b:free",
       messages: [
         {
+          role: "system",
+          content: "You are a concise financial advisor. Reply with ONLY 1-2 sentences of direct advice. No thinking, no reasoning, no preamble, no data repetition.",
+        },
+        {
           role: "user",
           content: prompt,
         },
       ],
-      max_tokens: 100,
-      temperature: 0.5,
+      max_tokens: 120,
+      temperature: 0.6,
     }),
   });
 
@@ -75,15 +76,16 @@ export async function getAIInsights(data: any): Promise<string> {
     return "API Key not configured. Please add OPENROUTER_API_KEY to your .env.local file.";
   }
 
-  const prompt = `TASK: Write exactly 1-2 sentences of financial advice. Do NOT explain your reasoning. Do NOT repeat the data. Just give the advice directly.
+  const prompt = `You are a professional financial advisor for "InvoiceZap". Provide 1-2 sentences of actionable business advice based on this data. Do not repeat the data.
 
-INVOICE DATA:
+DATA:
 - Total Invoices: ${data.totalInvoices}
-- Outstanding: ₹${data.totalOutstanding}
-- Paid This Month: ₹${data.totalPaidMonth}
-- Overdue: ${data.overdueCount}
+- Unpaid (Outstanding): ₹${data.totalOutstanding}
+- Paid this month: ₹${data.totalPaidMonth}
+- Overdue Invoices: ${data.overdueCount}
+- Rejected Invoices: ${data.rejectedCount}
 
-RESPONSE (1-2 sentences only, no preamble):`;
+ADVICE (Direct and helpful):`;
 
   try {
     return await callOpenRouter(prompt);

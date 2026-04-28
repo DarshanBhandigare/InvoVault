@@ -50,6 +50,7 @@ export default async function DashboardPage() {
   const paidInvoices = invoices?.filter((inv: any) => inv.status === 'paid') || [];
   const pendingInvoices = invoices?.filter((inv: any) => inv.status === 'pending') || [];
   const overdueInvoices = invoices?.filter((inv: any) => inv.status === 'overdue') || [];
+  const rejectedInvoices = invoices?.filter((inv: any) => inv.status === 'rejected') || [];
 
   const totalOutstanding = pendingInvoices.reduce((acc: number, inv: any) => acc + Number(inv.amount), 0) + 
                           overdueInvoices.reduce((acc: number, inv: any) => acc + Number(inv.amount), 0);
@@ -71,6 +72,7 @@ export default async function DashboardPage() {
     totalOutstanding,
     totalPaidMonth,
     overdueCount: overdueInvoices.length,
+    rejectedCount: rejectedInvoices.length,
     recentInvoices: recentInvoices.map(inv => ({
       client: inv.clients?.name,
       amount: inv.amount,
@@ -109,7 +111,7 @@ export default async function DashboardPage() {
       </header>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         <StatCard 
           label="Total Invoices" 
           value={totalInvoices.toString()} 
@@ -133,6 +135,12 @@ export default async function DashboardPage() {
           value={overdueInvoices.length.toString()} 
           icon={AlertCircle} 
           color="text-rose-500" 
+        />
+        <StatCard 
+          label="Rejected" 
+          value={rejectedInvoices.length.toString()} 
+          icon={AlertCircle} 
+          color="text-slate-500" 
         />
       </div>
 
