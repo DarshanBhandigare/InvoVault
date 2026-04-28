@@ -20,6 +20,7 @@ import {
   Cell
 } from "recharts";
 import Link from "next/link";
+import { getAIInsights } from "../../../lib/ai";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -63,6 +64,20 @@ export default async function DashboardPage() {
   }, 0);
 
   const recentInvoices = invoices?.slice(0, 5) || [];
+
+  // Fetch AI Insights
+  const aiInsight = await getAIInsights({
+    totalInvoices,
+    totalOutstanding,
+    totalPaidMonth,
+    overdueCount: overdueInvoices.length,
+    recentInvoices: recentInvoices.map(inv => ({
+      client: inv.clients?.name,
+      amount: inv.amount,
+      status: inv.status,
+      date: inv.issued_date
+    }))
+  });
 
   // Chart data (Simplified for now, could be improved with real grouping)
   const chartData = [
@@ -169,16 +184,14 @@ export default async function DashboardPage() {
           <div className="p-6 rounded-3xl bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
             <Sparkles className="w-8 h-8 mb-4 relative z-10" />
             <h3 className="text-lg font-bold mb-2 relative z-10">AI Insights</h3>
-            <p className="text-indigo-100 text-sm mb-6 relative z-10">
-              {overdueInvoices.length > 0 
-                ? `You have ${overdueInvoices.length} overdue invoices. Send a reminder to improve cash flow.`
-                : "Your cash flow looks healthy! Keep up the good work."}
+            <p className="text-indigo-100 text-sm mb-6 relative z-10 leading-relaxed">
+              {aiInsight}
             </p>
             <Link 
               href="/invoices"
               className="inline-block w-full text-center py-3 bg-white text-indigo-600 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-colors relative z-10"
             >
-              Take Action
+              Review Financials
             </Link>
             <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
           </div>
