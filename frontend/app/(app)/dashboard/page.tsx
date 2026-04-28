@@ -181,6 +181,22 @@ export default async function DashboardPage() {
                       <p className="text-xs text-muted-foreground">{inv.invoice_number}</p>
                     </div>
                   </div>
+                  
+                  {/* Items Display */}
+                  <div className="hidden md:block flex-1 px-8">
+                    {Array.isArray(inv.line_items) && inv.line_items[0] && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-medium text-muted-foreground bg-muted/80 px-2 py-1 rounded-md truncate max-w-[150px]">
+                          {inv.line_items[0].description}
+                        </span>
+                        {inv.line_items.length > 1 && (
+                          <span className="text-[9px] font-bold text-primary/60">
+                            +{inv.line_items.length - 1} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <div className="text-right">
                     <p className="text-sm font-bold">₹{Number(inv.amount).toLocaleString()}</p>
                     {(() => {
