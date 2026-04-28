@@ -37,10 +37,26 @@ export default async function DashboardPage() {
 
   // Calculate stats
   const totalInvoices = invoices?.length || 0;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Start of today
+
   const paidInvoices = invoices?.filter((inv: any) => inv.status === 'paid') || [];
-  const pendingInvoices = invoices?.filter((inv: any) => inv.status === 'pending') || [];
-  const overdueInvoices = invoices?.filter((inv: any) => inv.status === 'overdue') || [];
   const rejectedInvoices = invoices?.filter((inv: any) => inv.status === 'rejected') || [];
+  
+  // An invoice is overdue if status is 'overdue' OR (status is 'pending' AND due_date < today)
+  const overdueInvoices = invoices?.filter((inv: any) => {
+    if (inv.status === 'paid' || inv.status === 'rejected') return false;
+    if (inv.status === 'overdue') return true;
+    const dueDate = new Date(inv.due_date);
+    return dueDate < now;
+  }) || [];
+
+  // An invoice is pending ONLY if status is 'pending' AND due_date >= today
+  const pendingInvoices = invoices?.filter((inv: any) => {
+    if (inv.status !== 'pending') return false;
+    const dueDate = new Date(inv.due_date);
+    return dueDate >= now;
+  }) || [];
 
   const pendingAmount = pendingInvoices.reduce((acc: number, inv: any) => acc + Number(inv.amount), 0);
   const overdueAmount = overdueInvoices.reduce((acc: number, inv: any) => acc + Number(inv.amount), 0);
@@ -48,8 +64,8 @@ export default async function DashboardPage() {
   
   const totalPaidMonth = paidInvoices.reduce((acc: number, inv: any) => {
     const invDate = new Date(inv.issued_date);
-    const now = new Date();
-    if (invDate.getMonth() === now.getMonth() && invDate.getFullYear() === now.getFullYear()) {
+    const today = new Date();
+    if (invDate.getMonth() === today.getMonth() && invDate.getFullYear() === today.getFullYear()) {
       return acc + Number(inv.amount);
     }
     return acc;
@@ -167,12 +183,17 @@ export default async function DashboardPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold">₹{Number(inv.amount).toLocaleString()}</p>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${
-                      inv.status === 'paid' ? 'text-emerald-500' : 
-                      inv.status === 'overdue' ? 'text-rose-500' : 'text-amber-500'
-                    }`}>
-                      {inv.status}
-                    </p>
+                    {(() => {
+                      const isOverdue = inv.status === 'overdue' || (inv.status === 'pending' && new Date(inv.due_date) < now);
+                      return (
+                        <p className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${
+                          inv.status === 'paid' ? 'text-emerald-500' : 
+                          isOverdue ? 'text-rose-500' : 'text-amber-500'
+                        }`}>
+                          {isOverdue ? 'overdue' : inv.status}
+                        </p>
+                      );
+                    })()}
                   </div>
                 </div>
               ))

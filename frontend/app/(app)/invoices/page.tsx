@@ -36,15 +36,29 @@ export default async function InvoicesPage({
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
+  const now = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD
+
   if (status && status !== 'All') {
-    query = query.eq('status', status.toLowerCase());
+    if (status.toLowerCase() === 'overdue') {
+      // Overdue is either explicit status OR (pending AND due_date < today)
+      query = query.or(`status.eq.overdue,and(status.eq.pending,due_date.lt.${now})`);
+    } else if (status.toLowerCase() === 'pending') {
+      // Pending is only if status is pending AND due_date >= today
+      query = query.eq('status', 'pending').gte('due_date', now);
+    } else {
+      query = query.eq('status', status.toLowerCase());
+    }
   }
 
   if (client) {
     query = query.eq('client_id', client);
   }
 
-  const { data: invoices } = await query;
+  const { data: invoices, error: queryError } = await query;
+
+  if (queryError) {
+    console.error("Invoices fetch error:", queryError);
+  }
 
   // Get client name if filtering by client
   let clientName = "";

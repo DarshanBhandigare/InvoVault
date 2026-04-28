@@ -108,12 +108,24 @@ export default function InvoiceTable({ invoices }: InvoiceTableProps) {
                   <span className="font-black text-sm text-foreground">₹{Number(inv.amount).toLocaleString()}</span>
                 </td>
                 <td className="px-8 py-6">
-                  <span className={cn(
-                    "px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border",
-                    getStatusStyles(inv.status)
-                  )}>
-                    {inv.status}
-                  </span>
+                  {(() => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const isOverdue = inv.status === 'overdue' || (
+                      inv.status === 'pending' && 
+                      inv.due_date && 
+                      new Date(inv.due_date).getTime() < today.getTime()
+                    );
+                    const displayStatus = isOverdue ? 'overdue' : inv.status;
+                    return (
+                      <span className={cn(
+                        "px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border",
+                        getStatusStyles(displayStatus)
+                      )}>
+                        {displayStatus}
+                      </span>
+                    );
+                  })()}
                 </td>
                 <td className="px-8 py-6">
                   <span className="text-sm font-medium text-muted-foreground">
