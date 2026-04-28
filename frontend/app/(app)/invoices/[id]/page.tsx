@@ -79,7 +79,11 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         </div>
         <div className="flex gap-2">
           <StatusChangeButton invoiceId={invoice.id} currentStatus={invoice.status} />
-          <DownloadPdfButton elementId="invoice-document" filename={`Invoice-${invoice.invoice_number}.pdf`} />
+          <DownloadPdfButton 
+            invoice={invoice} 
+            business={business} 
+            filename={`Invoice-${invoice.invoice_number}.pdf`} 
+          />
         </div>
       </header>
 
