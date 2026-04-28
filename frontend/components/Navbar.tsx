@@ -21,7 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useTheme } from "next-themes";
+
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -34,7 +34,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
-  const { theme, setTheme } = useTheme();
+
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -104,11 +104,10 @@ export default function Navbar() {
               </div>
               
               <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200"
-                title="Toggle Theme"
+                title="Theme"
               >
-                {mounted && (theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />)}
+                <Sun className="w-4 h-4" />
               </button>
 
               <button 
@@ -123,10 +122,9 @@ export default function Navbar() {
             {/* Tablet/Small Desktop Toggle */}
             <div className="hidden md:flex lg:hidden items-center gap-2 mr-2 border-r border-white/10 pr-2">
               <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
               >
-                {mounted && (theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />)}
+                <Sun className="w-5 h-5" />
               </button>
             </div>
 
