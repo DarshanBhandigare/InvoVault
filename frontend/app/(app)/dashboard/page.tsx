@@ -134,12 +134,6 @@ export default async function DashboardPage() {
           icon={AlertCircle} 
           color="text-rose-500" 
         />
-        <StatCard 
-          label="Rejected" 
-          value={invoices?.filter((inv: any) => inv.status === 'rejected').length.toString() || "0"} 
-          icon={AlertCircle} 
-          color="text-slate-500" 
-        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
