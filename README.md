@@ -1,48 +1,64 @@
-# InvoiceZap — Smart AI Invoice Manager for Micro-SMEs
+# ⚡ InvoiceZap
+### *Smart AI Invoice Manager for Modern Businesses*
 
-AI-powered invoice management platform built for Indian micro-SMEs to save 10+ hours weekly.
+InvoiceZap is a premium, AI-powered invoice management platform designed to help micro-SMEs and freelancers track their finances, get paid faster, and gain intelligent insights into their business health.
+
+![InvoiceZap Dashboard](https://raw.githubusercontent.com/your-username/invoicezap/main/public/screenshot-dashboard.png)
+
+## 🌟 Key Features
+
+- **🧠 Smart AI Insights**: A deterministic engine that analyzes your financial data in real-time to provide actionable advice on cash flow and overdue payments.
+- **🌓 Dynamic Theme System**: A fully custom-built light and dark mode system with smooth transitions across the entire webpage.
+- **🚨 Intelligent Overdue Tracking**: Automatically flags pending invoices as overdue based on real-time date comparison—never miss a payment follow-up.
+- **📊 Financial Analytics**: Beautifully visualized growth charts and revenue trends powered by Recharts.
+- **💎 Premium Design**: A modern, glassmorphic UI built with Tailwind CSS v4 and Framer Motion for a state-of-the-art user experience.
+- **📄 Professional Invoices**: Quick creation with support for GST, custom tax rates, and instant PDF generation.
+
+## 🛠 Tech Stack
+
+- **Core**: Next.js 16 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS v4, Framer Motion (Animations), Lucide Icons
+- **Backend**: Supabase (PostgreSQL, Auth, RLS)
+- **State Management**: React Context (Custom Theme System)
+- **Charts**: Recharts
+- **Date Management**: Date-fns
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.10+
 - Node.js 18+
-- Anthropic API Key (Claude)
+- A Supabase Project
 
-### Backend Setup
-1. Navigate to `backend/`
-2. Create a `.env` file:
-   ```env
-   ANTHROPIC_API_KEY=your_api_key_here
-   ```
-3. Install dependencies:
+### Installation
+
+1. **Clone the repository**:
    ```bash
-   pip install -r requirements.txt
-   ```
-4. Run the server:
-   ```bash
-   python main.py
+   git clone https://github.com/your-username/invoicezap.git
+   cd invoicezap/frontend
    ```
 
-### Frontend Setup
-1. Navigate to `frontend/`
-2. Install dependencies:
+2. **Install dependencies**:
    ```bash
    npm install
    ```
-3. Run the development server:
+
+3. **Environment Setup**:
+   Create a `.env.local` file in the `frontend` directory:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+   ```
+
+4. **Run the development server**:
    ```bash
    npm run dev
    ```
-4. Open [http://localhost:3000](http://localhost:3000)
 
-## 🧠 Key Features
-- **AI Quick Create**: Describe your invoice in plain English (e.g. "Bill Suresh ₹5000 for web design") and let Claude extract the data.
-- **Smart Reminders**: Generate Friendly, Formal, or Urgent payment reminders for overdue invoices.
-- **Premium Dashboard**: Real-time revenue tracking and overdue alerts.
-- **GST Ready**: Built for the Indian market with GSTIN and INR support.
-- **PDF Generation**: Professional, branded PDF invoices at the click of a button.
+5. **Open the app**:
+   Visit [http://localhost:3000](http://localhost:3000)
 
-## 🛠 Tech Stack
-- **Backend**: FastAPI, LangChain, Claude 3.5 Sonnet, SQLAlchemy, SQLite.
-- **Frontend**: Next.js 14, Tailwind CSS 4, Framer Motion, Recharts, Lucide Icons.
+## 🛡 Security
+InvoiceZap implements **Row Level Security (RLS)** in Supabase, ensuring that users can only view and manage their own invoices, clients, and business profiles. All data is scoped to the `auth.uid()`.
+
+---
+Built with ❤️ by the InvoiceZap Team.
