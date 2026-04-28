@@ -13,6 +13,8 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 import InvoiceTable from "../../../components/InvoiceTable";
+import SearchInvoices from "../../../components/SearchInvoices";
+import { Suspense } from "react";
 
 export default async function InvoicesPage({
   searchParams,
@@ -30,6 +32,8 @@ export default async function InvoicesPage({
   }
 
   // Fetch invoices with client names
+  // NOTE: PostgREST's .or() cannot filter on joined table columns,
+  // so search filtering is done in JS after fetching.
   let query = supabase
     .from('invoices')
     .select('*, clients(name)')
@@ -54,11 +58,22 @@ export default async function InvoicesPage({
     query = query.eq('client_id', client);
   }
 
-  const { data: invoices, error: queryError } = await query;
+  const { data: rawInvoices, error: queryError } = await query;
 
   if (queryError) {
-    console.error("Invoices fetch error:", queryError);
+    console.error("Invoices fetch error:", JSON.stringify(queryError, null, 2));
   }
+
+  // Apply search filter in JS (PostgREST can't filter on joined table columns via .or())
+  const invoices = search
+    ? (rawInvoices || []).filter((inv) => {
+        const term = search.toLowerCase();
+        return (
+          inv.invoice_number?.toLowerCase().includes(term) ||
+          inv.clients?.name?.toLowerCase().includes(term)
+        );
+      })
+    : rawInvoices;
 
   // Get client name if filtering by client
   let clientName = "";
@@ -131,13 +146,11 @@ export default async function InvoicesPage({
           })}
         </div>
         
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input 
-            placeholder="Search clients..." 
-            className="w-full bg-card border border-border rounded-2xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
-          />
-        </div>
+        <Suspense fallback={
+          <div className="relative w-full md:w-80 h-[46px] bg-card/50 animate-pulse rounded-2xl border border-border" />
+        }>
+          <SearchInvoices />
+        </Suspense>
       </div>
 
       {invoices?.length === 0 ? (
