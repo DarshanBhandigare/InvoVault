@@ -171,7 +171,11 @@ export default async function DashboardPage() {
               <p className="text-center py-10 text-muted-foreground">No invoices yet.</p>
             ) : (
               recentInvoices.map((inv: any) => (
-                <div key={inv.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-muted/50 transition-colors group cursor-pointer border border-transparent hover:border-border">
+                <Link 
+                  key={inv.id} 
+                  href={`/invoices/${inv.id}`}
+                  className="flex items-center justify-between p-4 rounded-2xl hover:bg-muted/50 transition-colors group cursor-pointer border border-transparent hover:border-border"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center font-bold text-sm text-primary">
                       {inv.clients?.name?.[0] || 'C'}
@@ -211,7 +215,7 @@ export default async function DashboardPage() {
                       );
                     })()}
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>
