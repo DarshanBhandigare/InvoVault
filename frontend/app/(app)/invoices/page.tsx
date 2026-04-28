@@ -17,9 +17,9 @@ import InvoiceTable from "../../../components/InvoiceTable";
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; search?: string }>;
+  searchParams: Promise<{ status?: string; search?: string; client?: string }>;
 }) {
-  const { status, search } = await searchParams;
+  const { status, search, client } = await searchParams;
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -40,14 +40,47 @@ export default async function InvoicesPage({
     query = query.eq('status', status.toLowerCase());
   }
 
+  if (client) {
+    query = query.eq('client_id', client);
+  }
+
   const { data: invoices } = await query;
+
+  // Get client name if filtering by client
+  let clientName = "";
+  if (client && invoices && invoices.length > 0) {
+    clientName = invoices[0].clients?.name || "";
+  } else if (client) {
+    // If no invoices, we still might want the client name
+    const { data: clientData } = await supabase
+      .from('clients')
+      .select('name')
+      .eq('id', client)
+      .single();
+    clientName = clientData?.name || "";
+  }
 
   return (
     <div className="space-y-8">
       <header className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Invoices</h2>
-          <p className="text-muted-foreground">Manage and track all your outgoing bills in one place.</p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {client ? `${clientName}'s Invoices` : "Invoices"}
+          </h2>
+          <p className="text-muted-foreground">
+            {client 
+              ? `Showing all invoices issued to ${clientName}.` 
+              : "Manage and track all your outgoing bills in one place."}
+          </p>
+          {client && (
+            <Link 
+              href="/invoices"
+              className="inline-flex items-center gap-1.5 mt-4 px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full hover:bg-primary/20 transition-all"
+            >
+              Clear filter
+              <span className="opacity-60">×</span>
+            </Link>
+          )}
         </div>
         <Link 
           href="/invoices/new"
@@ -61,19 +94,27 @@ export default async function InvoicesPage({
       {/* Filters & Search - This will be handled in a client component or via URL params */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex bg-muted/50 p-1.5 rounded-2xl border border-border w-full md:w-auto overflow-x-auto">
-          {['All', 'Paid', 'Pending', 'Overdue', 'Rejected'].map((f) => (
-            <Link
-              key={f}
-              href={`/invoices${f === 'All' ? '' : `?status=${f}`}`}
-              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-                (status || 'All') === f 
-                  ? "bg-card text-primary shadow-sm border border-border" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {f}
-            </Link>
-          ))}
+          {['All', 'Paid', 'Pending', 'Overdue', 'Rejected'].map((f) => {
+            const params = new URLSearchParams();
+            if (f !== 'All') params.set('status', f);
+            if (client) params.set('client', client);
+            const queryString = params.toString();
+            const href = `/invoices${queryString ? `?${queryString}` : ''}`;
+            
+            return (
+              <Link
+                key={f}
+                href={href}
+                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                  (status || 'All') === f 
+                    ? "bg-card text-primary shadow-sm border border-border" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f}
+              </Link>
+            );
+          })}
         </div>
         
         <div className="relative w-full md:w-80">
