@@ -1,96 +1,116 @@
-const apiKey = process.env.OPENROUTER_API_KEY || "";
+// Smart, data-driven insights generated from real invoice data
 
-function cleanResponse(text: string): string {
-  // Remove common thinking patterns
-  let cleaned = text;
-
-  // Remove <think>...</think> blocks
-  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, "");
-
-  // Remove lines that look like reasoning/thinking
-  const lines = cleaned.split("\n").filter((line) => {
-    const l = line.trim().toLowerCase();
-    if (!l) return false;
-    if (l.startsWith("we need to")) return false;
-    if (l.startsWith("let me")) return false;
-    if (l.startsWith("i need to")) return false;
-    if (l.startsWith("data:")) return false;
-    if (l.startsWith("insight:")) return true;
-    if (l.startsWith("provide actionable")) return false;
-    if (l.startsWith("analysis:")) return false;
-    return true;
-  });
-
-  cleaned = lines
-    .join(" ")
-    .replace(/^insight:\s*/i, "")
-    .trim();
-
-  // If still too long or messy, take just the last 2 sentences
-  const sentences = cleaned.match(/[^.!?]+[.!?]+/g);
-  if (sentences && sentences.length > 2) {
-    cleaned = sentences.slice(-2).join(" ").trim();
-  }
-
-  return cleaned || "Your financial overview is ready. Check your invoices for details.";
+export interface InsightData {
+  totalInvoices: number;
+  totalOutstanding: number;
+  totalPaidMonth: number;
+  overdueCount: number;
+  rejectedCount: number;
+  pendingCount: number;
+  paidCount: number;
+  pendingAmount: number;
+  overdueAmount: number;
+  recentInvoices: {
+    client: string;
+    amount: number;
+    status: string;
+    date: string;
+  }[];
 }
 
-async function callOpenRouter(prompt: string): Promise<string> {
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      "HTTP-Referer": "http://localhost:3000",
-      "X-Title": "InvoiceZap",
-    },
-    body: JSON.stringify({
-      model: "nvidia/nemotron-3-super-120b-a12b:free",
-      messages: [
-        {
-          role: "system",
-          content: "You are a concise financial advisor. Reply with ONLY 1-2 sentences of direct advice. No thinking, no reasoning, no preamble, no data repetition.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      max_tokens: 120,
-      temperature: 0.6,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`OpenRouter request failed (${res.status}): ${err}`);
-  }
-
-  const json = await res.json();
-  const raw = json.choices?.[0]?.message?.content?.trim() || "";
-  return cleanResponse(raw);
+export interface Insight {
+  emoji: string;
+  text: string;
+  type: "warning" | "success" | "info" | "urgent";
 }
 
-export async function getAIInsights(data: any): Promise<string> {
-  if (!apiKey) {
-    return "API Key not configured. Please add OPENROUTER_API_KEY to your .env.local file.";
+export function generateInsights(data: InsightData): Insight[] {
+  const insights: Insight[] = [];
+
+  // --- Pending payments ---
+  if (data.pendingCount > 0) {
+    insights.push({
+      emoji: "⏳",
+      text: `You have ${data.pendingCount} pending payment${data.pendingCount > 1 ? "s" : ""} worth ₹${data.pendingAmount.toLocaleString()}.`,
+      type: "warning",
+    });
   }
 
-  const prompt = `You are a professional financial advisor for "InvoiceZap". Provide 1-2 sentences of actionable business advice based on this data. Do not repeat the data.
-
-DATA:
-- Total Invoices: ${data.totalInvoices}
-- Unpaid (Outstanding): ₹${data.totalOutstanding}
-- Paid this month: ₹${data.totalPaidMonth}
-- Overdue Invoices: ${data.overdueCount}
-- Rejected Invoices: ${data.rejectedCount}
-
-ADVICE (Direct and helpful):`;
-
-  try {
-    return await callOpenRouter(prompt);
-  } catch (error) {
-    console.error("AI Insights error:", error);
-    return "Could not generate insights at this time. Please try again later.";
+  // --- Overdue invoices ---
+  if (data.overdueCount > 0) {
+    insights.push({
+      emoji: "🚨",
+      text: `${data.overdueCount} invoice${data.overdueCount > 1 ? "s are" : " is"} overdue totaling ₹${data.overdueAmount.toLocaleString()}. Follow up now!`,
+      type: "urgent",
+    });
   }
+
+  // --- Rejected invoices ---
+  if (data.rejectedCount > 0) {
+    insights.push({
+      emoji: "❌",
+      text: `${data.rejectedCount} invoice${data.rejectedCount > 1 ? "s were" : " was"} rejected. Review and resend to avoid revenue loss.`,
+      type: "warning",
+    });
+  }
+
+  // --- Great month ---
+  if (data.totalPaidMonth > 0) {
+    insights.push({
+      emoji: "💰",
+      text: `₹${data.totalPaidMonth.toLocaleString()} collected this month. ${data.totalPaidMonth > data.totalOutstanding ? "You're ahead — great work!" : "Keep pushing to clear outstanding dues!"}`,
+      type: data.totalPaidMonth > data.totalOutstanding ? "success" : "info",
+    });
+  }
+
+  // --- All clear ---
+  if (data.overdueCount === 0 && data.pendingCount === 0 && data.totalInvoices > 0) {
+    insights.push({
+      emoji: "✅",
+      text: "All invoices are settled. Your books are clean!",
+      type: "success",
+    });
+  }
+
+  // --- No invoices yet ---
+  if (data.totalInvoices === 0) {
+    insights.push({
+      emoji: "📄",
+      text: "No invoices yet. Create your first invoice to start tracking!",
+      type: "info",
+    });
+  }
+
+  // --- Outstanding amount high ---
+  if (data.totalOutstanding > 5000) {
+    insights.push({
+      emoji: "📊",
+      text: `₹${data.totalOutstanding.toLocaleString()} is outstanding. Consider sending payment reminders.`,
+      type: "info",
+    });
+  }
+
+  // --- Collection rate ---
+  if (data.totalInvoices > 0 && data.paidCount > 0) {
+    const collectionRate = Math.round((data.paidCount / data.totalInvoices) * 100);
+    if (collectionRate >= 80) {
+      insights.push({
+        emoji: "🎯",
+        text: `${collectionRate}% collection rate — excellent payment follow-through!`,
+        type: "success",
+      });
+    } else if (collectionRate < 50) {
+      insights.push({
+        emoji: "⚠️",
+        text: `Only ${collectionRate}% of invoices are paid. Time to follow up on collections.`,
+        type: "warning",
+      });
+    }
+  }
+
+  // Return top 3 most relevant insights (prioritize urgent > warning > info > success)
+  const priority = { urgent: 0, warning: 1, info: 2, success: 3 };
+  insights.sort((a, b) => priority[a.type] - priority[b.type]);
+
+  return insights.slice(0, 3);
 }

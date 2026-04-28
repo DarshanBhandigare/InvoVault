@@ -9,18 +9,8 @@ import {
   ArrowUpRight,
   Sparkles
 } from "lucide-react";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Cell
-} from "recharts";
 import Link from "next/link";
-import { getAIInsights } from "../../../lib/ai";
+import { generateInsights, type InsightData } from "../../../lib/ai";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -52,8 +42,9 @@ export default async function DashboardPage() {
   const overdueInvoices = invoices?.filter((inv: any) => inv.status === 'overdue') || [];
   const rejectedInvoices = invoices?.filter((inv: any) => inv.status === 'rejected') || [];
 
-  const totalOutstanding = pendingInvoices.reduce((acc: number, inv: any) => acc + Number(inv.amount), 0) + 
-                          overdueInvoices.reduce((acc: number, inv: any) => acc + Number(inv.amount), 0);
+  const pendingAmount = pendingInvoices.reduce((acc: number, inv: any) => acc + Number(inv.amount), 0);
+  const overdueAmount = overdueInvoices.reduce((acc: number, inv: any) => acc + Number(inv.amount), 0);
+  const totalOutstanding = pendingAmount + overdueAmount;
   
   const totalPaidMonth = paidInvoices.reduce((acc: number, inv: any) => {
     const invDate = new Date(inv.issued_date);
@@ -66,13 +57,17 @@ export default async function DashboardPage() {
 
   const recentInvoices = invoices?.slice(0, 5) || [];
 
-  // Fetch AI Insights
-  const aiInsight = await getAIInsights({
+  // Generate Smart Insights
+  const insights = generateInsights({
     totalInvoices,
     totalOutstanding,
     totalPaidMonth,
     overdueCount: overdueInvoices.length,
     rejectedCount: rejectedInvoices.length,
+    pendingCount: pendingInvoices.length,
+    paidCount: paidInvoices.length,
+    pendingAmount,
+    overdueAmount,
     recentInvoices: recentInvoices.map(inv => ({
       client: inv.clients?.name,
       amount: inv.amount,
@@ -81,15 +76,19 @@ export default async function DashboardPage() {
     }))
   });
 
-  // Chart data (Simplified for now, could be improved with real grouping)
-  const chartData = [
-    { name: 'Jan', amount: 0 },
-    { name: 'Feb', amount: 0 },
-    { name: 'Mar', amount: 0 },
-    { name: 'Apr', amount: 0 },
-    { name: 'May', amount: 0 },
-    { name: 'Jun', amount: 0 },
-  ];
+  const typeColors: Record<string, string> = {
+    urgent: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+    warning: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+    info: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+    success: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+  };
+
+  const typeBadgeLabels: Record<string, string> = {
+    urgent: "Action Required",
+    warning: "Heads Up",
+    info: "Info",
+    success: "Good News",
+  };
 
   return (
     <div className="space-y-8">
@@ -181,14 +180,29 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Actions / Nudge */}
+        {/* AI Insights */}
         <div className="space-y-6">
-          <div className="p-6 rounded-3xl bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
-            <Sparkles className="w-8 h-8 mb-4 relative z-10" />
-            <h3 className="text-lg font-bold mb-2 relative z-10">AI Insights</h3>
-            <p className="text-indigo-100 text-sm mb-6 relative z-10 leading-relaxed">
-              {aiInsight}
-            </p>
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-700 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+            <Sparkles className="w-8 h-8 mb-3 relative z-10" />
+            <h3 className="text-lg font-bold mb-4 relative z-10">AI Insights</h3>
+            
+            <div className="space-y-3 relative z-10 mb-6">
+              {insights.map((insight, i) => (
+                <div 
+                  key={i} 
+                  className="flex items-start gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10"
+                >
+                  <span className="text-lg flex-shrink-0 mt-0.5">{insight.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mb-1 border ${typeColors[insight.type]}`}>
+                      {typeBadgeLabels[insight.type]}
+                    </span>
+                    <p className="text-sm text-indigo-50 leading-relaxed">{insight.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <Link 
               href="/invoices"
               className="inline-block w-full text-center py-3 bg-white text-indigo-600 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-colors relative z-10"
@@ -196,6 +210,7 @@ export default async function DashboardPage() {
               Review Financials
             </Link>
             <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute -left-8 -top-8 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl" />
           </div>
         </div>
       </div>
