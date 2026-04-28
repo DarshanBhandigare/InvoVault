@@ -78,6 +78,7 @@ export default function InvoiceTable({ invoices }: InvoiceTableProps) {
             <tr>
               <th className="px-8 py-6">Invoice #</th>
               <th className="px-8 py-6">Client</th>
+              <th className="px-8 py-6">Items</th>
               <th className="px-8 py-6">Amount</th>
               <th className="px-8 py-6">Status</th>
               <th className="px-8 py-6">Due Date</th>
@@ -85,7 +86,13 @@ export default function InvoiceTable({ invoices }: InvoiceTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
-            {invoices.map((inv) => (
+            {invoices.map((inv) => {
+              const lineItems: { description: string; quantity: number; price: number }[] =
+                Array.isArray(inv.line_items) ? inv.line_items : [];
+              const firstItem = lineItems[0];
+              const extraCount = lineItems.length - 1;
+
+              return (
               <tr 
                 key={inv.id} 
                 className={cn(
@@ -103,6 +110,26 @@ export default function InvoiceTable({ invoices }: InvoiceTableProps) {
                     </div>
                     <span className="font-bold text-sm">{inv.clients?.name || 'Deleted Client'}</span>
                   </div>
+                </td>
+                {/* Items column */}
+                <td className="px-8 py-6 max-w-[200px]">
+                  {firstItem ? (
+                    <div className="flex flex-col gap-1.5">
+                      <span
+                        className="inline-block px-2.5 py-1 rounded-lg bg-primary/8 text-primary text-[11px] font-semibold truncate max-w-[180px]"
+                        title={firstItem.description}
+                      >
+                        {firstItem.description}
+                      </span>
+                      {extraCount > 0 && (
+                        <span className="text-[10px] font-bold text-muted-foreground ml-1">
+                          +{extraCount} more
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">—</span>
+                  )}
                 </td>
                 <td className="px-8 py-6">
                   <span className="font-black text-sm text-foreground">₹{Number(inv.amount).toLocaleString()}</span>
@@ -175,7 +202,8 @@ export default function InvoiceTable({ invoices }: InvoiceTableProps) {
                   </div>
                 </td>
               </tr>
-            ))}
+                );
+            })}
           </tbody>
         </table>
       </div>

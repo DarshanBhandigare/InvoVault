@@ -70,7 +70,10 @@ export default async function InvoicesPage({
         const term = search.toLowerCase();
         return (
           inv.invoice_number?.toLowerCase().includes(term) ||
-          inv.clients?.name?.toLowerCase().includes(term)
+          inv.clients?.name?.toLowerCase().includes(term) ||
+          (Array.isArray(inv.line_items) && inv.line_items.some((item: any) => 
+            item.description?.toLowerCase().includes(term)
+          ))
         );
       })
     : rawInvoices;
